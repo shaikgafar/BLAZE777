@@ -1,0 +1,62 @@
+// AI Cost Estimation - This replaces your Python FastAPI backend
+const handleAnalyze = async (fileUrl) => {
+  setAnalyzing(true);
+  
+  const sqft = parseFloat(formData.square_footage) || 1000;
+  const location = formData.location || "India";
+  
+  // This is the equivalent of your Gemini API call
+  const analysis = await base44.integrations.Core.InvokeLLM({
+    prompt: `You are a construction cost estimator for Indian residential projects. 
+Project Details:
+- Type: ${formData.project_type}
+- Size: ${sqft} sq ft
+- Location: ${location}
+
+Provide detailed cost estimate with:
+1. Room breakdown (bedrooms, bathrooms, kitchen, living areas)
+2. Material quantities and costs in INR (TMT steel, cement, sand, bricks, tiles, paint, electrical, plumbing)
+3. Labor costs (mason, helper, electrician, plumber, painter)
+4. Other costs (permits, design, supervision)
+
+Use current Indian market rates. Be specific with quantities and realistic pricing.`,
+    file_urls: fileUrl ? [fileUrl] : undefined, // Blueprint image
+    response_json_schema: {
+      type: "object",
+      properties: {
+        room_breakdown: {
+          type: "object",
+          properties: {
+            bedrooms: { type: "number" },
+            bathrooms: { type: "number" },
+            kitchen: { type: "number" },
+            living_area: { type: "number" },
+            balcony: { type: "number" }
+          }
+        },
+        materials: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              category: { type: "string" },
+              name: { type: "string" },
+              quantity: { type: "number" },
+              unit: { type: "string" },
+              unit_cost: { type: "number" },
+              total_cost: { type: "number" }
+            }
+          }
+        },
+        labor_costs: { /* ... */ },
+        other_costs: { /* ... */ },
+        estimated_total_cost: { type: "number" },
+        cost_per_sqft: { type: "number" },
+        risk_score: { type: "number" },
+        risk_factors: { /* ... */ }
+      }
+    }
+  });
+
+  setAnalysisResult(analysis);
+};
